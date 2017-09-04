@@ -115,14 +115,12 @@
     <Compile Include="Handlers\OrderSubmittedHandler.cs" />
     <Compile Include="Messages\Commands\InitiatePaymentProcessCommand.cs" />
     <Compile Include="PaymentClient\ReliablePaymentClient.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="App.config" />
     <None Include="nservicebus.host.exe.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <Folder Include="Sagas\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Divergent.Finance.Data\Divergent.Finance.Data.csproj">
@@ -138,17 +136,7 @@
       <Name>Divergent.Sales.Messages</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Sagas\" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
   <PropertyGroup>
     <StartAction>Program</StartAction>
     <StartProgram>$(ProjectDir)$(OutputPath)NServiceBus.Host.exe</StartProgram>
