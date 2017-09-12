@@ -336,3 +336,108 @@ To keep the example and 'deployment' simple, a post-build event is used to copy 
 Due to various reasons, these files might be missing and the aforementioned error might occur for either the `IProvideCustomerInfo` or `IProvideShippingInfo` parameters in the constructor of the `ShipWithFedexCommandHandler` class.
 
 Do a full rebuild of the entire solution using `CTRL+SHIFT+B`
+
+## Advanced exercise 4.4: visualizing the system
+
+You are not expected to finish this <u>advanced exercise</u>. It was added for those that finish the exercises well within time and to show the capabilities of the Particular Software platform. You also have the ability to finish this advanced exercise outside of the workshop. If you have questions, you can ask them during the workshop or using the Particular Software [free support channel in Google Groups](https://groups.google.com/forum/#!forum/particularsoftware).
+
+Since this is an advanced exercise, you are likely required to read documentation to finish the exercise. Links to documentation will be provided.
+
+If you finished the advanced exercise in module 02, you've seen how ServicePulse can monitor and inform us of our endpoints. In this module we'll have a look at how ServiceInsight visualizes the system.
+
+### Step 1
+
+Open up the ServiceInsight Management tool from the Windows Start menu.
+
+### Step 2
+
+ServiceInsight connects to ServiceControl via its api to retrieve information about all endpoints and messages. If not connected to ServiceControl, the top-left icon with the tooltip 'Connect Endpoint Explorer to ServiceControl instance' allows you to connect to ServiceControl. The default address should be
+
+`http://localhost:33333/api/`
+
+In the 'ServiceControl Management' tool you can create multiple instances of ServiceControl and provide different ports for each of them.
+
+### Step 3
+
+Once connected, on the left side of ServiceInsight, you should be able to see every endpoint sending audit messages to ServiceControl. On the right you should be able to see various messages in a grid.
+
+Below the grid you should see the flow diagram for the last send message. The currently selected message is visible in the diagram by a large border around the message. Scrolling through the messages in the grid should show the border move from message to message in the diagram.
+
+You can also use this the other way around, by clicking on messages in the diagram to highlight the corresponding message in the grid.
+
+### Step 4
+
+On the right side of the diagram are the properties of each message. They provide various details such as
+
+- The message type, its unique message id and the conversation id.
+- Performance details on when the message was sent, how long it took to process it and how long the critical time was, the time from sending it until successfully processing it.
+- If the message wasn't successfully processed, it will show the complete stacktrace here. If you continuously find the stacktrace to include way too much information, especially when dealing with async stacktraces, you can use [a sample to clean them up a little](https://docs.particular.net/samples/logging/stack-trace-cleaning/).
+
+### Step 5
+
+At the bottom of the diagram, you can find alternate views, like the sequence diagram.
+
+The saga view is empty because the message might not have entered a saga. Next to that, for this view to be useable we need to install the plugin for saga auditing.
+
+## Advanced exercise 4.5: enable saga auditing
+
+In this exercise, we'll set up every endpoint to send heartbeats, but especially audit messages to ServiceControl.
+
+### Step 1
+
+You can read about the [Saga Audit plugin on our documentation website](https://docs.particular.net/servicecontrol/plugins/saga-audit).
+
+We only need to install the plugin in the `Divergent.Shipping` project, since it is the only project containing a saga at the moment. If you happen to add sagas to other endpoints as well, don't forget to add the plugin there as well.
+
+Don't forget to configure the endpoint to tell it where to send saga audit messages to.
+
+### Step 2
+
+Start up the solution and create another order using the web interface.
+
+Once messages start arriving in the saga, additional messages will be send to ServiceControl which contain more detailed information on what happened with the saga.
+
+### Step 3
+
+In ServiceInsight both the Flow diagram as the Saga diagram should display additional data.
+
+The Flow diagram will now show which messages initiated, updated or completed the saga.
+
+The Saga diagram will now display all incoming and outgoing messages.
+
+## Advanced exercise 4.6: errors and saga timeouts
+
+This exercise is for those interested in more features of sagas and the Particular Software platform. They might overlap the advanced exercises of module 03.
+
+### Step 1
+
+Try to throw an error in a handler, which will prevent the saga from progressing any further. With immediate- and delayed retries this might take a while, you can read up on how to configure [immediate retries](https://docs.particular.net/nservicebus/recoverability/configure-immediate-retries) and [delayed retries](https://docs.particular.net/nservicebus/recoverability/configure-delayed-retries) so that they will be disabled.
+
+The result should be that our saga won't receive expected messages and wait forever.
+
+Once error messages arrive in ServiceControl, you should see them appear in ServicePulse and ServiceInsight. You can now retry the messages from either user interface. If you remove throwing the exception, the messages should be processed normally and the saga should complete as well.
+
+### Step 2
+
+Imagine the payment to never return to the saga. Should we wait forever for this message, without knowing why? Perhaps we could ask the business if we could add an additional step in our process to take action upon waiting too long for an endpoint to reply.
+
+Perform the action from step 1 again, throwing an exception. But now send a timeout message from the saga. In this exercise we'll complete the saga. But it is completely depended on the business what we should do. Options could be to send an email to finance to take action, to cancel the order or ask the customer to manually pay the invoice via our website, to just name a few.
+
+Summary of actions to take
+
+- Throw the exception so the payment will never succeed
+- Send a timeout message in the saga, with more information about [how to in our documentation](https://docs.particular.net/nservicebus/sagas/timeouts).
+- Process the timeout message and complete the saga
+- Check ServiceInsight to see how this is visualized
+
+### Step 3
+
+Discuss the following items
+
+- Did you ever have a business process where you did something equal to the example used above? Like waiting forever on an action to happen. You should be able to come up with multiple examples, because almost every larger business process has this.
+- If you could come up with examples, how did you deal with them? And if you did deal with them, was it easier or harder to fix then with a timeout message?
+- If you have or haven't done something like just discussed, did you discuss it with the business? Did they provide solutions? What option was chosen and how difficult was it to implement?
+
+We hope you get an idea on how powerful sagas can be to orchestrate business processes.
+
+If you would like to discuss more, we would love to as well! Don't hesitate to contact us at support@particular.net.

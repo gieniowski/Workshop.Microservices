@@ -234,7 +234,9 @@ In the saga add a new async method called `ProcessOrder` that you will call from
 
 ## Advanced exercises
 
-These advanced exercises are provided as additional challenges. They don't have such detailed guidance and we don't provide solutions for them. If you feel like it, you can do them during the workshop, in your hotel room, or at home. If you have questions, you can ask them during the workshop or using the Particular Software free support channel in Google Groups: https://groups.google.com/forum/#!forum/particularsoftware.
+You are not expected to finish this <u>advanced exercise</u>. It was added for those that finish the exercises well within time and need an additional challenge working with NServiceBus sagas. You also have the ability to finish this advanced exercise outside of the workshop. If you have questions, you can ask them during the workshop or using the Particular Software [free support channel in Google Groups](https://groups.google.com/forum/#!forum/particularsoftware).
+
+Since this is an advanced exercise, you are likely required to read documentation to finish the exercise. Links to documentation will be provided.
 
 ### Advanced exercise 1
 

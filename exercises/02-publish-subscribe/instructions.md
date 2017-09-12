@@ -361,3 +361,77 @@ In the `App.config` file in the `Divergent.Shipping` project, add `MessageEndpoi
   </MessageEndpointMappings>
 </UnicastBusConfig>
 ```
+
+
+
+## Advanced exercise 2.5 : monitoring endpoints
+
+You are not expected to finish this <u>advanced exercise</u>. It was added for those that finish the exercises well within time and to show the capabilities of the Particular Software platform. You also have the ability to finish this advanced exercise outside of the workshop. If you have questions, you can ask them during the workshop or using the Particular Software [free support channel in Google Groups](https://groups.google.com/forum/#!forum/particularsoftware).
+
+Since this is an advanced exercise, you are likely required to read documentation to finish the exercise. Links to documentation will be provided.
+
+### Step 1
+
+In Visual Studio, open the project `Divergent.Customers` and have a look at the endpoint configuration. There should be configuration for forwarding messages to the audit queue and sending poison messages to the error queue.
+
+You can read much more about auditing messages and different ways to configure this [in our documentation](https://docs.particular.net/nservicebus/operations/auditing).
+
+### Step 2
+
+Verify if the queues are created. You can use Windows' Computer Management tool. Press `ctrl` and `x` to open the menu in Windows and select 'Computer Management'. Then find MSMQ and verify if the queues are created under 'Private Queues'. 
+
+Note: The MSMQ MMC snap-in is very limit. [QueueExplorer](http://www.cogin.com/mq/) is a great tool which provides more value.
+
+### Step 3
+
+If you've properly set up ServiceControl, it should already be running and have processed messages while running your exercises. Let's have a look at ServicePulse.
+
+Open the browser at http://localhost:9090/
+
+Note: If ServicePulse doesn't seem to be running, or it cannot connect to ServiceControl, you can either verify if the proper ServiceControl instance is started. Or you can check 'Services' in Windows itself to see if both services (ServicePulse and ServiceControl) are running. By default, all services should start with the name 'Particular' in front of it.
+
+### Step 4
+
+If you have successfully opened ServicePulse, you can see it is informing us via the list of 'Last 10 events' that it received messages from an endpoint, but it is not monitored yet. We need to set up the monitoring plugin first.
+
+### Step 5
+
+Let's install the Particular Software **heartbeat plugin**. You can find [documentation here](https://docs.particular.net/servicecontrol/plugins/heartbeat). Install this plugin into every project that hosts an endpoint, via the NuGet user interface or via the 'Package Manager Console'.
+
+### Step 6
+
+The **heartbeat plugin** works using a different queue than audit and error messages. You can read in the documentation how to configure NServiceBus and tell it which queue it should send to. 
+
+You can find the name of the queue by accessing the 'ServiceControl Management' tool, which you can find in the Windows Start menu. The name of the instance is also the name of the queue.
+
+Make sure you configure every project that hosts an endpoint. You can easily copy & paste this to every project, as the queue doesn't (and shouldn't) change in every project.
+
+### Step 7
+
+Run the solution and check ServicePulse while it starts.
+
+After a while the 'Last 10 events' should show that `Divergent.Customers` or any other endpoint should have started. After a while it will show that these endpoints should be running the heartbeats plugin.
+
+### Step 8
+
+Turn off the endpoints by stopping debugging in Visual Studio or shutting down the console windows.
+
+Remember that ServiceControl is expecting heartbeat messages to come in. If it won't receive those it will wait a little while longer before immediately reporting an endpoint as being down. But if you wait for half a minute or so, ServicePulse should report the endpoints being down.
+
+After starting up the solution, ServicePulse should report the endpoints are working again.
+
+### Step 9
+
+At the top of the page in ServicePulse, you see a menu with various options. Check 'Failed Messages' if there are any messages that you weren't able to process in the past. Check how they can be group and retried individually or per group.
+
+This is a powerful feature that can be used to retry message. But discuss this with, for example, the operations department. Imagine a system with a high throughput, but to performance maintenance, the database with your business data was brought offline for a couple of minutes. This could mean thousands of messages will end up in the error queue and thus in ServiceControl.
+
+Once the system is up and running again, it has to handle the high throughput again. Should we retry all those messages we could introduce a spike of messages the system might be able to deal with. Resulting in more error messages, which could could introduce the same problem.
+
+### Step 10
+
+We now have a dashboard that can inform us when an endpoint is going down. A few things should be mentioned.
+
+- Operations doesn't want to monitor a dashboard the entire day. Luckily ServiceControl also uses publish/subscribe to notify any subscribers using messages. You can build a special endpoint that subscribes to ServiceControl its integration events and decide how operations should be informed. By email, sms or anything else. Read more about [integration events](https://docs.particular.net/servicecontrol/contracts).
+- You might notice several endpoints with the same name. Endpoints send heartbeats by providing a unique host identifier, made up of their endpoint name and a hash of the folder the endpoint is installed in.
+  Our exercises all have the same endpoint name, but different folders. Another example is when you deploy endpoints using [Octopus](https://octopus.com/). This will deploy every version in its own folder, with the result that every version will spawn a new monitored endpoint in ServicePulse. You can solve this by [overriding the host identifier](https://docs.particular.net/nservicebus/hosting/override-hostid) yourself.
