@@ -339,55 +339,51 @@ Do a full rebuild of the entire solution using `CTRL+SHIFT+B`
 
 ## Advanced exercise 4.4: visualizing the system
 
-You are not expected to finish this <u>advanced exercise</u>. It was added for those that finish the exercises well within time and to show the capabilities of the Particular Software platform. You also have the ability to finish this advanced exercise outside of the workshop. If you have questions, you can ask them during the workshop or using the Particular Software [free support channel in Google Groups](https://groups.google.com/forum/#!forum/particularsoftware).
+**Important: Before attempting the advanced exercises, please ensure you have followed [the instructions for preparing your machine for the advanced exercises](README.md#preparing-your-machine-for-the-advanced-exercises).**
 
-Since this is an advanced exercise, you are likely required to read documentation to finish the exercise. Links to documentation will be provided.
-
-If you finished the advanced exercise in module 02, you've seen how ServicePulse can monitor and inform us of our endpoints. In this module we'll have a look at how ServiceInsight visualizes the system.
+If you finished the advanced exercises in module 2, you've seen how ServicePulse can monitor and inform us about the status of our endpoints. In this module we'll have a look at how ServiceInsight visualizes the system.
 
 ### Step 1
 
-Open up the ServiceInsight Management tool from the Windows Start menu.
+Open ServiceInsight from the Windows Start menu.
 
 ### Step 2
 
-ServiceInsight connects to ServiceControl via its api to retrieve information about all endpoints and messages. If not connected to ServiceControl, the top-left icon with the tooltip 'Connect Endpoint Explorer to ServiceControl instance' allows you to connect to ServiceControl. The default address should be
+ServiceInsight connects to ServiceControl to retrieve information about all endpoints and messages. If ServiceInsight is yet not connected to ServiceControl, the top-left icon with the tooltip 'Connect Endpoint Explorer to ServiceControl instance' allows you to connect to ServiceControl. The default address is `http://localhost:33333/api/`.
 
-`http://localhost:33333/api/`
-
-In the 'ServiceControl Management' tool you can create multiple instances of ServiceControl and provide different ports for each of them.
+NOTE: The ServiceControl Management tool allows the creation of multiple instances of ServiceControl, each using a different port.
 
 ### Step 3
 
-Once connected, on the left side of ServiceInsight, you should be able to see every endpoint sending audit messages to ServiceControl. On the right you should be able to see various messages in a grid.
+After connecting to ServiceControl, the "Endpoint Explorer" on the left side of ServiceInsight shows a top level node representing the ServiceControl instance (showing the URL) containing a node for every endpoint which is sending audit messages to ServiceControl. Click on the either the top level node or one of the endpoints nodes. To the right, at the top of the window, the "Messages" shows the messages themselves.
 
-Below the grid you should see the flow diagram for the last send message. The currently selected message is visible in the diagram by a large border around the message. Scrolling through the messages in the grid should show the border move from message to message in the diagram.
+Below the message list you will see a flow diagram for the most recent message. The currently selected message is visible in the flow diagram by a thick border around the message.
 
-You can also use this the other way around, by clicking on messages in the diagram to highlight the corresponding message in the grid.
+When you select another message in the message list, the flow diagram will update accordingly. This also works the other way around. When you click on message in the flow diagram, the corresponding mesage will be selected in the messages list.
 
 ### Step 4
 
-On the right side of the diagram are the properties of each message. They provide various details such as
+To the right of the flow diagram you will see "Message Properties" showing the properties of the currently selected message, such as:
 
-- The message type, its unique message id and the conversation id.
-- Performance details on when the message was sent, how long it took to process it and how long the critical time was, the time from sending it until successfully processing it.
-- If the message wasn't successfully processed, it will show the complete stacktrace here. If you continuously find the stacktrace to include way too much information, especially when dealing with async stacktraces, you can use [a sample to clean them up a little](https://docs.particular.net/samples/logging/stack-trace-cleaning/).
+- The type, unique message ID, and conversation ID of the message.
+- Performance details on when the message was sent, how long it took to process it, and how long the critical time was, which is the time from sending it until successfully processing it.
+- If the message wasn't successfully processed, the complete stacktrace of the exception is shown under "Errors", "ExceptionInfo". If the stacktrace includes a large amount of redundant information, e.g. async invocation information, this can be cleaned up using the method shown in [this sample](https://docs.particular.net/samples/logging/stack-trace-cleaning/).
 
 ### Step 5
 
-At the bottom of the diagram, you can find alternate views, like the sequence diagram.
+At the bottom of the flow diagram, you will see tabs which allow switching to other views.
 
-The saga view is empty because the message might not have entered a saga. Next to that, for this view to be useable we need to install the plugin for saga auditing.
+The "Saga" will be empty. This will be the case when the currently selected message was not handled by a saga. Even when the message was handled by a saga the endpoint needs to have the saga auditing plugin installed before the saga view will be populated.
 
 ## Advanced exercise 4.5: enable saga auditing
 
-In this exercise, we'll set up every endpoint to send heartbeats, but especially audit messages to ServiceControl.
+In this exercise, we'll set up every endpoint to send saga audit messages to ServiceControl, which allow us to visualize sagas in ServiceControl.
 
 ### Step 1
 
-You can read about the [Saga Audit plugin on our documentation website](https://docs.particular.net/servicecontrol/plugins/saga-audit).
+If you are not familiar with the saga audit plugin, you will need to read the [documentation](https://docs.particular.net/servicecontrol/plugins/saga-audit) for how to instal it first.
 
-We only need to install the plugin in the `Divergent.Shipping` project, since it is the only project containing a saga at the moment. If you happen to add sagas to other endpoints as well, don't forget to add the plugin there as well.
+You only need to install the plugin in the `Divergent.Shipping` project, since it is the only project containing a saga at the moment. If you've added sagas to other endpoints, don't forget to install the plugin there as well.
 
 Don't forget to configure the endpoint to tell it where to send saga audit messages to.
 
@@ -395,49 +391,47 @@ Don't forget to configure the endpoint to tell it where to send saga audit messa
 
 Start up the solution and create another order using the web interface.
 
-Once messages start arriving in the saga, additional messages will be send to ServiceControl which contain more detailed information on what happened with the saga.
+Once messages start arriving in the saga, additional messages will be sent to ServiceControl which contain more detailed information on what happened within the saga.
 
 ### Step 3
 
-In ServiceInsight both the Flow diagram as the Saga diagram should display additional data.
+In ServiceInsight, both the flow diagram as the saga view should display additional data.
 
-The Flow diagram will now show which messages initiated, updated or completed the saga.
+The flow diagram will now show which messages initiated, updated or completed the saga.
 
-The Saga diagram will now display all incoming and outgoing messages.
+The saga view will now display all incoming and outgoing messages.
 
 ## Advanced exercise 4.6: errors and saga timeouts
 
-This exercise is for those interested in more features of sagas and the Particular Software platform. They might overlap the advanced exercises of module 03.
+This exercise is simliar to what you saw in the advanced exercises for module 2, but this time with sagas.
 
 ### Step 1
 
-Try to throw an error in a handler, which will prevent the saga from progressing any further. With immediate- and delayed retries this might take a while, you can read up on how to configure [immediate retries](https://docs.particular.net/nservicebus/recoverability/configure-immediate-retries) and [delayed retries](https://docs.particular.net/nservicebus/recoverability/configure-delayed-retries) so that they will be disabled.
+Add the throwing of an exception to a saga handler method, which will prevent the saga from progressing any further. This means our saga won't receive and process the messages it requires to be completed, and it will continue to exist indefinitely.
 
-The result should be that our saga won't receive expected messages and wait forever.
-
-Once error messages arrive in ServiceControl, you should see them appear in ServicePulse and ServiceInsight. You can now retry the messages from either user interface. If you remove throwing the exception, the messages should be processed normally and the saga should complete as well.
+After the failed messages arrive in ServiceControl, you should see them appear in ServicePulse and ServiceInsight. You can now retry the messages from either user interface. If you remove the throwing of the exception, the messages should be processed normally and the saga should be completed.
 
 ### Step 2
 
-Imagine the payment to never return to the saga. Should we wait forever for this message, without knowing why? Perhaps we could ask the business if we could add an additional step in our process to take action upon waiting too long for an endpoint to reply.
+Imagine the message indicating successful payment is never received by the saga. Should we wait forever for this message? Perhaps we could ask the business how long we should wait and what to do if we don't recieve a message in that time.
 
-Perform the action from step 1 again, throwing an exception. But now send a timeout message from the saga. In this exercise we'll complete the saga. But it is completely depended on the business what we should do. Options could be to send an email to finance to take action, to cancel the order or ask the customer to manually pay the invoice via our website, to just name a few.
+Perform the action from step 1 again, throwing an exception. But this time, send a timeout message from the saga. In this exercise we'll complete the saga, taking the action that business tells us should happen when the payment is not received in the alloted time. Possible actions could be sending an email to finance to take action, cancelling the order, or asking the customer to manually pay the invoice via our website.
 
-Summary of actions to take
+Summary of actions to take:
 
-- Throw the exception so the payment will never succeed
+- Throw an exception so the payment will never succeed
 - Send a timeout message in the saga, with more information about [how to in our documentation](https://docs.particular.net/nservicebus/sagas/timeouts).
-- Process the timeout message and complete the saga
-- Check ServiceInsight to see how this is visualized
+- Process the timeout message and complete the saga (perhaps with a comment showing that _some_ business defined action would be iniated at this point if this were a production system).
+- Check ServiceInsight to see how this is visualized.
 
 ### Step 3
 
-Discuss the following items
+Consider the following items and perhaps discuss them with your colleagues:
 
-- Did you ever have a business process where you did something equal to the example used above? Like waiting forever on an action to happen. You should be able to come up with multiple examples, because almost every larger business process has this.
-- If you could come up with examples, how did you deal with them? And if you did deal with them, was it easier or harder to fix then with a timeout message?
-- If you have or haven't done something like just discussed, did you discuss it with the business? Did they provide solutions? What option was chosen and how difficult was it to implement?
+- Have you ever seen a business process with similar characteristics to the above example? Such as waiting forever for some action to happen, which had already failed elsewhere. It's usually easy to think of multiple examples from any non-trivial business process.
+- How did you deal with those? Did you have to run batch jobs, or connect directly to the database to hack the data manually? Or some other complicated workaround?
+- When this happened? Were you able to ask the business how to handle the failures and then design the system to match the solution described by the business? Or did you have to translate the business language into a complex set of technical operations which approximated the business language?
 
-We hope you get an idea on how powerful sagas can be to orchestrate business processes.
+Hopefully this exercise has demonstrated how powerful sagas can be to orchestrate business processes.
 
-If you would like to discuss more, we would love to as well! Don't hesitate to contact us at support@particular.net.
+If you'd like to discuss this more, please don't hesitate to drop us a line in our [community discussion forum](https://groups.google.com/forum/#!forum/particularsoftware).

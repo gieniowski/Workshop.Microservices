@@ -103,11 +103,15 @@ The solutions contain single page applications (SPAs) and use `IIS Express`. To 
   - Ensure all HTML template files are closed when the application is run, or:
   - Manually change the browser address to the root URL.
 
-## Preparing your machine for advanced exercises
+## Preparing your machine for the advanced exercises
 
 If you completed all the standard exercises, first of all, well done!
 
-To complete the advanced exercises, you'll need to install the rest of the Particular Service Platform:
+You can now attempt the advanced exercises. Don't worry if you don't manage to start or complete the advanced exercises during the workshop. You can also attempt them after the workshop is finished. If you have questions, you can ask them during the workshop or in our [community discussion forum](https://groups.google.com/forum/#!forum/particularsoftware).
+
+It is likely that you will have to read documentation for the Particular Service Platform to finish the advanced exercises. Links to documentation will be provided.
+
+To complete the advanced exercises, you first need to install the rest of the Particular Service Platform:
 
 - ServicePulse: a web app which monitors your endpoints.
 - ServiceInsight: a desktop app which visualises the flow of messages within and between endpoints in detail.

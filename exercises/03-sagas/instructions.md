@@ -232,32 +232,24 @@ In the saga add a new async method called `ProcessOrder` that you will call from
     }
 ```
 
-## Advanced exercises
 
-You are not expected to finish this <u>advanced exercise</u>. It was added for those that finish the exercises well within time and need an additional challenge working with NServiceBus sagas. You also have the ability to finish this advanced exercise outside of the workshop. If you have questions, you can ask them during the workshop or using the Particular Software [free support channel in Google Groups](https://groups.google.com/forum/#!forum/particularsoftware).
+## Advanced Exercise 3.5
 
-Since this is an advanced exercise, you are likely required to read documentation to finish the exercise. Links to documentation will be provided.
+**Important: Before attempting the advanced exercises, please ensure you have followed [the instructions for preparing your machine for the advanced exercises](README.md#preparing-your-machine-for-the-advanced-exercises).**
 
-### Advanced exercise 1
+Sagas are excellent for coordinating a business process. In the current saga we're only able to execute the happy path of the business process, where everything works. Payment succeeds and arrives within a short time. But what if the `PaymentSucceededEvent` never arrives?
 
-This exercise does not require existing NServiceBus skills, but you will probably need to read [the documentation](http://docs.particular.net/nservicebus/sagas/timeouts) to complete it.
+We can request a timeout in our saga so that, after a certain amount of time when nothing has happened, we can take action such as notifying the shipping or sales department that there may be a problem. A saga in the Finance bounded context would take care of this, but let's also take some action after the timeout elapses. Otherwise, this saga would live forever without anyone noticing the order processing failed in some way.
 
-Sagas are excellent for coordinating a business process. In the current saga we are only able to execute the happy path of the business process. The path where everything goes well. Payment succeeds and arrives within a short time. But what if the `PaymentSucceededEvent` never arrives?
 
-We can request a timeout in our saga so that, after a certain amount of time, we can take action such as notifying the shipping or sales department. In the real world, a saga in the Finance bounded context would take care of this, but let's also take some action after the timeout elapses. Otherwise, this saga would live forever without anyone noticing the order processing failed in some way.
-
-### Advanced exercise 2
-
-This is an expert-level exercise.
+## Advanced Exercise 3.6 : alternative payment providers
 
 The Finance bounded context contacts a payment provider to execute payments. The `Divergent.Finance` project does this in the `InitiatePaymentProcessCommandHandler` class, by calling the `ReliablePaymentClient` class and executing the payment using the `ProcessPayment` method.
 
 Although this is a good and extremely reliable payment provider, it's also very expensive. Business is growing, and it would be prudent to look for alternatives to cut costs. There is another payment provider, but it's less reliable. Obviously this can't get in the way of our payments, but we can at least try to use it. If it fails, we can fallback to the reliable, but more expensive, provider.
 
-#### Exercise
-
 Create a new saga in the Finance bounded context which first tries to process the payment with the unreliable payment provider. If that fails (i.e. you don't receive `PaymentSucceededEvent` within the expected time frame), fall back to the reliable provider.
 
-Sagas are not supposed to retrieve data from a data store or call out to external systems. They should execute tasks using [the request/response pattern](http://docs.particular.net/nservicebus/sagas/#sagas-and-request-response). This means that, rather than processing the payment directly, the saga should send a message ot another handler in the Finance bounded context to process the payment on its behalf. Whether it fails or succeeds, that handler should [reply to the saga](http://docs.particular.net/nservicebus/messaging/reply-to-a-message) with the status of the payment. If the payment failed, the saga should send another message to process the payment, but this time to the reliable, but expensive, provider.
+Sagas are not supposed to retrieve data from a data store or call out to external systems. They should execute tasks using [the request/response pattern](http://docs.particular.net/nservicebus/sagas/#sagas-and-request-response). This means that, rather than processing the payment directly, the saga should send a message to another handler in the Finance bounded context to process the payment on its behalf. Whether it fails or succeeds, that handler should [reply to the saga](http://docs.particular.net/nservicebus/messaging/reply-to-a-message) with the status of the payment. If the payment failed, the saga should send another message to process the payment, but this time to the reliable, but expensive, provider.
 
 The solution should end up with at least two new handlers and a new saga. Depending on your solution, you may end up with more.
